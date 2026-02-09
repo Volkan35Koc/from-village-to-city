@@ -19,14 +19,24 @@ export const GameProvider = ({ children }) => {
             setGameState(state);
         });
 
+        socket.on('gameJoined', ({ gameState }) => {
+            setGameState(gameState);
+        });
+
         socket.on('gameUpdate', (state) => {
             setGameState(state);
+        });
+
+        socket.on('error', (msg) => {
+            alert(msg);
         });
 
         return () => {
             socket.off('connect');
             socket.off('gameStarted');
+            socket.off('gameJoined');
             socket.off('gameUpdate');
+            socket.off('error');
         };
     }, [socket]);
 
