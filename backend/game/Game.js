@@ -81,7 +81,7 @@ class Game {
         const player = this.players.find(p => p.id === socket.id);
         if (!player) return;
 
-        console.log(`Action: ${action} from ${player.name}`, payload);
+        // console.log(`Action: ${action} from ${player.name}`, payload);
 
         switch (action) {
             case 'START_GAME':

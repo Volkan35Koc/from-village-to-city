@@ -12,17 +12,14 @@ export const GameProvider = ({ children }) => {
         if (!socket) return;
 
         socket.on('connect', () => {
-            console.log('Connected to server');
             setPlayerId(socket.id);
         });
 
         socket.on('gameStarted', (state) => {
-            console.log('Game Started:', state);
             setGameState(state);
         });
 
         socket.on('gameUpdate', (state) => {
-            console.log('Game Update:', state);
             setGameState(state);
         });
 
