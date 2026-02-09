@@ -15,6 +15,20 @@ class GameManager {
             this.joinGame(socket, roomId, playerName);
         });
 
+        socket.on('createGameWithBots', (playerName, botCount) => {
+            const roomId = 'BOT-' + this.generateRoomId(); // Special prefix
+            const game = new Game(roomId, this.io);
+            game.isBotGame = true;
+            this.games.set(roomId, game);
+
+            this.joinGame(socket, roomId, playerName);
+
+            // Add Bots
+            for (let i = 0; i < botCount; i++) {
+                game.addBot(`Bot ${i + 1}`);
+            }
+        });
+
         socket.on('joinGame', (roomId, playerName) => {
             if (this.games.has(roomId)) {
                 this.joinGame(socket, roomId, playerName);

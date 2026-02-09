@@ -52,6 +52,12 @@ export const GameProvider = ({ children }) => {
         }
     };
 
+    const createGameWithBots = (playerName, botCount) => {
+        if (socket) {
+            socket.emit('createGameWithBots', playerName, botCount);
+        }
+    };
+
     const performAction = (action, payload) => {
         if (socket && gameState) {
             socket.emit('gameAction', { roomId: gameState.roomId, action, payload });
@@ -59,7 +65,7 @@ export const GameProvider = ({ children }) => {
     };
 
     return (
-        <GameContext.Provider value={{ gameState, playerId, joinGame, createGame, performAction }}>
+        <GameContext.Provider value={{ gameState, playerId, joinGame, createGame, createGameWithBots, performAction }}>
             {children}
         </GameContext.Provider>
     );
