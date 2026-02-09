@@ -63,88 +63,18 @@ const Game = () => {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', padding: '20px', fontFamily: 'sans-serif' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-                <div>
-                    <h2>Room: {gameState.roomId}</h2>
-                    <p>Phase: {gameState.gameState.phase}</p>
-                    {gameState.gameState.phase === 'ROBBER_PLACEMENT' && (
-                        <p style={{ fontWeight: 'bold', color: 'red' }}>
-                            {gameState.gameState.currentPlayer === playerId ? "Click a tile to move the Robber!" : "Waiting for current player to move Robber..."}
-                        </p>
-                    )}
-                    {(gameState.gameState.phase === 'SETUP_ROUND_1' || gameState.gameState.phase === 'SETUP_ROUND_2') && (
-                        <p style={{ fontWeight: 'bold', color: 'blue' }}>
-                            {gameState.gameState.currentPlayer === playerId ?
-                                `Place a ${gameState.gameState.setupSubPhase === 'SETTLEMENT' ? 'Settlement' : 'Road'}!`
-                                : `Waiting for ${gameState.players.find(p => p.id === gameState.gameState.currentPlayer)?.name} to place a ${gameState.gameState.setupSubPhase === 'SETTLEMENT' ? 'Settlement' : 'Road'}...`}
-                        </p>
-                    )}
-                    <button onClick={() => performAction('END_TURN')} disabled={gameState.gameState.currentPlayer !== playerId || gameState.gameState.phase === 'ROBBER_PLACEMENT' || gameState.gameState.phase.startsWith('SETUP')}>End Turn</button>
-                </div>
-                <div>
-                    <h3>Players:</h3>
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                        {gameState.players.map(p => (
-                            <li key={p.id} style={{
-                                fontWeight: p.id === playerId ? 'bold' : 'normal',
-                                color: ['red', 'blue', 'orange', 'black'][p.colorIndex],
-                                padding: '2px 0'
-                            }}>
-                                {p.name} {p.id === gameState.gameState.currentPlayer ? '<< Turn' : ''}
-                                <br />
-                                <span style={{ fontSize: '0.9em', color: '#666' }}>
-                                    VP: {p.victoryPoints} | Cards: {Object.values(p.resources).reduce((a, b) => a + b, 0)}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
+        <div style={{ display: 'flex', flexDirection: 'row', height: '100vh', width: '100vw', fontFamily: 'sans-serif', overflow: 'hidden' }}>
 
-                    <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
-                        <h4>Bonuses:</h4>
-                        <div style={{ fontSize: '0.9em' }}>
-                            <p>
-                                <strong>Largest Army: </strong>
-                                {gameState.gameState.largestArmy.holder ?
-                                    `${gameState.players.find(p => p.id === gameState.gameState.largestArmy.holder)?.name} (${gameState.gameState.largestArmy.size})`
-                                    : 'None'}
-                            </p>
-                            <p>
-                                <strong>Longest Road: </strong>
-                                {gameState.gameState.longestRoad.holder ?
-                                    `${gameState.players.find(p => p.id === gameState.gameState.longestRoad.holder)?.name} (${gameState.gameState.longestRoad.size})`
-                                    : 'None'}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Trade Notification */}
-            {gameState.gameState.tradeOffer && gameState.gameState.tradeOffer.status === 'PENDING' && (
-                <div style={{ background: '#fff3cd', border: '1px solid #ffeeba', padding: '10px', margin: '10px 0', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <strong>Trade Offer</strong> from {gameState.players.find(p => p.id === gameState.gameState.tradeOffer.from)?.name}:
-                        <div style={{ display: 'flex', gap: '20px', marginTop: '5px' }}>
-                            <span>Gives: {Object.entries(gameState.gameState.tradeOffer.give).map(([k, v]) => `${k}:${v}`).join(', ')}</span>
-                            <span>Asks: {Object.entries(gameState.gameState.tradeOffer.get).map(([k, v]) => `${k}:${v}`).join(', ')}</span>
-                        </div>
-                    </div>
-                    {gameState.gameState.tradeOffer.from !== playerId && (
-                        <div>
-                            <button onClick={handleAcceptTrade} style={{ marginRight: '10px', background: 'green', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer' }}>Accept</button>
-                            <button onClick={handleRejectTrade} style={{ background: 'red', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer' }}>Reject</button>
-                        </div>
-                    )}
-                    {gameState.gameState.tradeOffer.from === playerId && (
-                        <div>
-                            <button onClick={handleRejectTrade} style={{ background: '#666', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer' }}>Cancel</button>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#f0f0f0', margin: '20px 0', overflow: 'hidden', borderRadius: '8px' }}>
+            {/* LEFT PANEL: Game Board */}
+            <div style={{
+                flex: 7,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                background: '#e0e0e0',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
                 <HexGrid
                     board={gameState.board}
                     players={gameState.players}
@@ -152,26 +82,138 @@ const Game = () => {
                     onEdgeClick={handleEdgeClick}
                     onHexClick={handleHexClick}
                 />
+
+                {/* Phase Overlay on Board */}
+                <div style={{ position: 'absolute', top: '20px', left: '20px', background: 'rgba(255,255,255,0.8)', padding: '10px', borderRadius: '8px', pointerEvents: 'none' }}>
+                    <h2 style={{ margin: 0 }}>Room: {gameState.roomId}</h2>
+                    <p style={{ margin: 0 }}>Phase: {gameState.gameState.phase}</p>
+                    {gameState.gameState.phase === 'ROBBER_PLACEMENT' && (
+                        <p style={{ fontWeight: 'bold', color: 'red', margin: '5px 0 0 0' }}>
+                            {gameState.gameState.currentPlayer === playerId ? "Move Robber!" : "Waiting for Robber..."}
+                        </p>
+                    )}
+                </div>
             </div>
 
-            <div style={{ borderTop: '1px solid #ccc', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* RIGHT PANEL: Info & Controls */}
+            <div style={{
+                flex: 3,
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '20px',
+                background: '#fff',
+                borderLeft: '2px solid #ccc',
+                overflowY: 'auto',
+                boxShadow: '-2px 0 5px rgba(0,0,0,0.1)'
+            }}>
+                {/* Turn Status */}
+                <div style={{ marginBottom: '20px', textAlign: 'center', padding: '10px', background: gameState.gameState.currentPlayer === playerId ? '#d4edda' : '#f8d7da', borderRadius: '5px' }}>
+                    <h3 style={{ margin: 0 }}>
+                        {gameState.gameState.currentPlayer === playerId ? "YOUR TURN" : `Waiting for ${gameState.players.find(p => p.id === gameState.gameState.currentPlayer)?.name}`}
+                    </h3>
+                    {(gameState.gameState.phase === 'SETUP_ROUND_1' || gameState.gameState.phase === 'SETUP_ROUND_2') && (
+                        <p style={{ margin: '5px 0 0 0', fontWeight: 'bold' }}>
+                            {gameState.gameState.setupSubPhase === 'SETTLEMENT' ? 'Place Settlement' : 'Place Road'}
+                        </p>
+                    )}
+                </div>
+
+                {/* Dice & Resources */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <strong>Dice</strong>
+                        <div style={{ fontSize: '2em', fontWeight: 'bold' }}>{gameState.gameState.dice[0] + gameState.gameState.dice[1]}</div>
+                    </div>
+                </div>
+
+                {/* My Resources */}
                 {myPlayer && (
-                    <div style={{ flex: 1 }}>
-                        <h3>My Resources:</h3>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ marginBottom: '20px', padding: '10px', background: '#f8f9fa', borderRadius: '8px' }}>
+                        <h4 style={{ marginTop: 0 }}>My Resources:</h4>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                             {Object.entries(myPlayer.resources).map(([res, amount]) => (
                                 <div key={res} style={{
-                                    border: '1px solid #333',
-                                    padding: '5px 10px',
+                                    border: '1px solid #ccc',
+                                    padding: '5px 8px',
                                     borderRadius: '4px',
-                                    background: amount > 0 ? '#eef' : '#eee',
-                                    fontWeight: amount > 0 ? 'bold' : 'normal'
+                                    background: amount > 0 ? '#fff' : '#eee',
+                                    fontWeight: amount > 0 ? 'bold' : 'normal',
+                                    fontSize: '0.9em'
                                 }}>
                                     {res}: {amount}
                                 </div>
                             ))}
                         </div>
-                        {/* Dev Cards Section */}
+                    </div>
+                )}
+
+                {/* Actions */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                    {myPlayer && gameState.gameState.currentPlayer === myPlayer.id && (
+                        <>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button
+                                    onClick={() => performAction('ROLL_DICE')}
+                                    disabled={gameState.gameState.phase !== 'PLAYING'}
+                                    style={{ flex: 1, padding: '10px', cursor: 'pointer', fontWeight: 'bold', background: '#e67e22', color: 'white', border: 'none', borderRadius: '4px' }}
+                                >
+                                    Roll Dice
+                                </button>
+                                <button onClick={() => performAction('END_TURN')} disabled={gameState.gameState.phase !== 'PLAYING'} style={{ flex: 1, padding: '10px', cursor: 'pointer', background: '#c0392b', color: 'white', border: 'none', borderRadius: '4px' }}>
+                                    End Turn
+                                </button>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button
+                                    onClick={() => setShowTradeModal(true)}
+                                    disabled={gameState.gameState.phase !== 'PLAYING'}
+                                    style={{ flex: 1, padding: '10px', cursor: 'pointer', background: '#3498db', color: 'white', border: 'none', borderRadius: '4px' }}
+                                >
+                                    Trade
+                                </button>
+                                <button
+                                    onClick={() => performAction('BUY_DEV_CARD')}
+                                    disabled={gameState.gameState.phase !== 'PLAYING'}
+                                    style={{ flex: 1, padding: '10px', cursor: 'pointer', background: '#9b59b6', color: 'white', border: 'none', borderRadius: '4px' }}
+                                >
+                                    Buy Dev Card
+                                </button>
+                            </div>
+                        </>
+                    )}
+                    {gameState.players.length >= 2 && gameState.gameState.phase === 'WAITING' && (
+                        <button onClick={() => performAction('START_GAME')} style={{ padding: '15px', cursor: 'pointer', background: '#2ecc71', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1.2em' }}>Start Game</button>
+                    )}
+                </div>
+
+                {/* Player List */}
+                <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ marginBottom: '10px' }}>Players:</h4>
+                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                        {gameState.players.map(p => (
+                            <li key={p.id} style={{
+                                padding: '5px',
+                                borderBottom: '1px solid #eee',
+                                color: ['red', 'blue', 'orange', 'black'][p.colorIndex],
+                                fontWeight: p.id === playerId ? 'bold' : 'normal'
+                            }}>
+                                {p.name} - VP: {p.victoryPoints} - Cards: {Object.values(p.resources).reduce((a, b) => a + b, 0)}
+                                {p.id === gameState.gameState.currentPlayer && ' ◀'}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Bonuses */}
+                <div style={{ fontSize: '0.9em', color: '#555', marginBottom: '20px' }}>
+                    <div>Longest Road: {gameState.gameState.longestRoad.holder ? gameState.players.find(p => p.id === gameState.gameState.longestRoad.holder)?.name : 'None'} ({gameState.gameState.longestRoad.size})</div>
+                    <div>Largest Army: {gameState.gameState.largestArmy.holder ? gameState.players.find(p => p.id === gameState.gameState.largestArmy.holder)?.name : 'None'} ({gameState.gameState.largestArmy.size})</div>
+                </div>
+
+                {/* Dev Cards */}
+                {myPlayer && (
+                    <div style={{ marginBottom: '20px' }}>
                         <DevCardDisplay
                             cards={myPlayer.devCards}
                             canPlay={gameState.gameState.currentPlayer === myPlayer.id && (gameState.gameState.phase === 'PLAYING' || gameState.gameState.phase === 'ROBBER_PLACEMENT')}
@@ -180,41 +222,37 @@ const Game = () => {
                     </div>
                 )}
 
-                <div style={{ textAlign: 'center', minWidth: '150px' }}>
-                    <h3>Dice: <span style={{ fontSize: '1.2em' }}>{gameState.gameState.dice[0] + gameState.gameState.dice[1]}</span></h3>
+                {/* Building Costs Reference */}
+                <div style={{ marginTop: 'auto' }}>
+                    <BuildingCosts />
                 </div>
 
-                <div style={{ marginTop: '10px', flex: 1, display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                    {myPlayer && gameState.gameState.currentPlayer === myPlayer.id && (
-                        <>
-                            <button
-                                onClick={() => performAction('BUY_DEV_CARD')}
-                                disabled={gameState.gameState.phase !== 'PLAYING'}
-                                style={{ padding: '10px 20px', cursor: 'pointer', background: '#9b59b6', color: 'white', border: 'none', borderRadius: '4px' }}
-                            >
-                                Buy Dev Card
-                            </button>
-                            <button
-                                onClick={() => setShowTradeModal(true)}
-                                disabled={gameState.gameState.phase !== 'PLAYING'}
-                                style={{ padding: '10px 20px', cursor: 'pointer', background: '#3498db', color: 'white', border: 'none', borderRadius: '4px' }}
-                            >
-                                Trade
-                            </button>
-                            <button
-                                onClick={() => performAction('ROLL_DICE')}
-                                disabled={gameState.gameState.phase !== 'PLAYING'}
-                                style={{ padding: '10px 20px', cursor: 'pointer', fontWeight: 'bold' }}
-                            >
-                                Roll Dice
-                            </button>
-                        </>
-                    )}
-                    {gameState.players.length >= 2 && gameState.gameState.phase === 'WAITING' && (
-                        <button onClick={() => performAction('START_GAME')} style={{ padding: '10px 20px', cursor: 'pointer', background: '#2ecc71', color: 'white', border: 'none', borderRadius: '4px' }}>Start Game</button>
+            </div>
+
+            {/* Trade Notification Overlay */}
+            {gameState.gameState.tradeOffer && gameState.gameState.tradeOffer.status === 'PENDING' && (
+                <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#fff', padding: '20px', boxShadow: '0 0 20px rgba(0,0,0,0.5)', zIndex: 200, borderRadius: '8px', textAlign: 'center' }}>
+                    <h3>Trade Offer from {gameState.players.find(p => p.id === gameState.gameState.tradeOffer.from)?.name}</h3>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', margin: '15px 0' }}>
+                        <div>
+                            <strong>Gives:</strong><br />
+                            {Object.entries(gameState.gameState.tradeOffer.give).map(([k, v]) => <div key={k}>{v} {k}</div>)}
+                        </div>
+                        <div>
+                            <strong>Asks:</strong><br />
+                            {Object.entries(gameState.gameState.tradeOffer.get).map(([k, v]) => <div key={k}>{v} {k}</div>)}
+                        </div>
+                    </div>
+                    {gameState.gameState.tradeOffer.from !== playerId ? (
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                            <button onClick={handleAcceptTrade} style={{ background: 'green', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer', borderRadius: '4px' }}>Accept</button>
+                            <button onClick={handleRejectTrade} style={{ background: 'red', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer', borderRadius: '4px' }}>Reject</button>
+                        </div>
+                    ) : (
+                        <button onClick={handleRejectTrade} style={{ background: '#666', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer', borderRadius: '4px' }}>Cancel</button>
                     )}
                 </div>
-            </div>
+            )}
 
             {showTradeModal && myPlayer && (
                 <TradeModal
@@ -224,19 +262,14 @@ const Game = () => {
                 />
             )}
 
-            <div style={{ position: 'fixed', bottom: '20px', left: '20px', height: '300px', width: '300px', zIndex: 100 }}>
-                {myPlayer && (
-                    <Chat
-                        messages={gameState.gameState.chatMessages || []}
-                        onSendMessage={(text) => performAction('SEND_MESSAGE', { message: text })}
-                        myPlayerName={myPlayer.name}
-                    />
-                )}
-            </div>
-
-            <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 90 }}>
-                <BuildingCosts />
-            </div>
+            {/* Chat Overlay */}
+            {myPlayer && (
+                <Chat
+                    messages={gameState.gameState.chatMessages || []}
+                    onSendMessage={(text) => performAction('SEND_MESSAGE', { message: text })}
+                    myPlayerName={myPlayer.name}
+                />
+            )}
         </div>
     );
 };

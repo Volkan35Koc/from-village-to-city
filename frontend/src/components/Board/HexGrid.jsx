@@ -6,7 +6,7 @@ import Edge from './Edge';
 
 const HEX_SIZE = 60;
 const START_X = 400; // Center of canvas horizontally
-const START_Y = 300; // Center of canvas vertically
+const START_Y = 400; // Center of canvas vertically
 
 const HexGrid = ({ board, players, onIntersectionClick, onEdgeClick, onHexClick }) => {
     if (!board || !board.tiles) return null;
@@ -50,8 +50,11 @@ const HexGrid = ({ board, players, onIntersectionClick, onEdgeClick, onHexClick 
         y2: r.y2 + START_Y
     })) : [];
 
+    const width = 800;
+    const height = 800; // Increased height
+
     return (
-        <Stage width={800} height={600}>
+        <Stage width={width} height={height}>
             <Layer>
                 {/* 1. Hexes */}
                 {board.tiles.map((tile) => {

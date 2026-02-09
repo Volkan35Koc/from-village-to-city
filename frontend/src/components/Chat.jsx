@@ -4,13 +4,17 @@ const Chat = ({ messages, onSendMessage, myPlayerName }) => {
     const [inputText, setInputText] = useState('');
     const messagesEndRef = useRef(null);
 
+    const [isOpen, setIsOpen] = useState(false);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        if (isOpen) {
+            scrollToBottom();
+        }
+    }, [messages, isOpen]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -20,17 +24,65 @@ const Chat = ({ messages, onSendMessage, myPlayerName }) => {
         }
     };
 
+    if (!isOpen) {
+        return (
+            <div style={{
+                position: 'fixed',
+                bottom: '20px',
+                right: '20px',
+                zIndex: 100
+            }}>
+                <button
+                    onClick={() => setIsOpen(true)}
+                    style={{
+                        padding: '10px 15px',
+                        background: '#3498db',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    Chat 💬
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div style={{
-            width: '300px',
-            borderLeft: '1px solid #ccc',
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            width: '320px',
+            height: '400px',
+            border: '1px solid #ccc',
+            borderRadius: '8px',
             display: 'flex',
             flexDirection: 'column',
-            height: '100%',
-            backgroundColor: '#fff'
+            backgroundColor: '#fff',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+            zIndex: 100
         }}>
-            <div style={{ padding: '10px', background: '#eee', borderBottom: '1px solid #ccc' }}>
+            <div style={{
+                padding: '10px',
+                background: '#3498db',
+                color: 'white',
+                borderTopLeftRadius: '8px',
+                borderTopRightRadius: '8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+            }}>
                 <strong>Game Chat</strong>
+                <button
+                    onClick={() => setIsOpen(false)}
+                    style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.2em' }}
+                >
+                    ✕
+                </button>
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
